@@ -20,6 +20,7 @@ There are two types of configuration captured in the build file:
    * [Codegen](#codegen)
    * [Build](#build)
    * [Package](#package)
+   * [Test](#test)
    * [Archive](#archive)
 
 # Non-Stage Configuration
@@ -175,7 +176,7 @@ Instead of using this method, the build spec should be responsible for putting l
 ##### lvBuildSpecAllTargets
 The LvBuildSpecAllTargets step builds all builds specs of the specified name in the provided project.
 
-###### Suported Keys
+###### Supported Keys
 Key | Description | Required
 -|-|-
 `project` | reference to the project table in the projects section of `build.toml`  | **YES**
@@ -209,7 +210,7 @@ dependency_target = 'linux64' # get dependencies from linux64 directory
 ##### lvBuildAll
 The LvBuildAll step builds all build specs under all targets in the specified project.
 
-###### Suported Keys
+###### Supported Keys
 Key | Description | Required
 -|-|-
 `project` | reference to the project table in the projects section of `build.toml`  | **YES**
@@ -277,8 +278,37 @@ To define steps to execute during build, include a steps array in the build tabl
 ### Notes
 Most often, this stage will contain one or more of the lvBuild* steps. If there are no steps in `[[build.steps]]`, this stage will not be added to the pipeline.
 
+## Test
+The test stage executes immediately after the build stage. It runs any tests specified in the build.toml.
+
+### Definition
+To define steps to execute during build, include a steps array in the test table. Valid steps are defined above.
+
+`[[test.steps]]`
+
+### Notes
+Most often, this stage will contain one or more of the test steps. If there are no steps in `[[test.steps]]`, this stage will not be added to the pipeline.
+ 
+#### Supported Testers
+The package stage requires a `type` to be defined.
+
+Key | Description | Required
+-|-|-
+`type`| test framework to use | **YES**
+
+##### VI Tester
+The VI Tester type uses the [JKI VI Tester](https://github.com/JKISoftware/JKI-VI-Tester) and [niveristand-custom-device-testing-tools](https://github.com/ni/niveristand-custom-device-testing-tools) to run tests.
+
+###### Supported Keys
+Key | Description | Required
+-|-|-
+`test_path`| path to the test to execute | **YES**
+
+##### Notes
+In order to use the VI Tester type, the [niveristand-custom-device-testing-tools](https://github.com/ni/niveristand-custom-device-testing-tools) must be forked to the organization that contains the repository running through the pipeline. While developing with the testing tools, the [niveristand-custom-device-testing-tools](https://github.com/ni/niveristand-custom-device-testing-tools) repository must be cloned to a directory that is adjacent to the development directory.
+
 ## Package
-The package stage executes immediately after the build stage. It takes the specified directory and packages everything into a single file for simple distribution.
+The package stage executes immediately after the test stage. It takes the specified directory and packages everything into a single file for simple distribution.
 
 ### Definition
 To define a single package stage, add a package table to `build.toml`.
@@ -291,7 +321,7 @@ To export multiple package stages, add an array of packages to `build.toml`.
 
 `[[package]]`
 
-#### Supported Packages
+
 The package stage requires a `type` to be defined. 
 
 Key | Description | Required
@@ -301,7 +331,7 @@ Key | Description | Required
 ##### nipkg
 The nipkg package type builds a package that can be installed through NI Package Manager (NIPM). NIPM must be installed on the build machine in order to build this type.
 
-###### Suported Keys
+###### Supported Keys
 Key | Description | Required
 -|-|-
 `payload_dir` | location of files to be packaged | **YES**
@@ -323,7 +353,7 @@ install_destination = 'documents\National Instruments\NI VeriStand {veristand_ve
 
 The zip package type builds a compressed package that can be installed using ZIP decompression utilities. Most operating systems natively support inflating a compressed ZIP file.
 
-###### Suported Keys
+###### Supported Keys
 Key | Description | Required
 -|-|-
 `payload_dir` | location of files to be compressed and packaged | **YES**
